@@ -2,6 +2,15 @@
 @section('title', 'Авторизация')
 @section('content')
     <div class="col-sm-6 my-3 mx-auto">
+        @if(count($errors) > 0)
+            <div class="alert alert-danger">
+                <ul>
+                    @foreach ($errors->all() as $error)
+                        <li>{{$error}}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
         <form action="/login" method="post">
             @csrf
             <div class="mb-3">

@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\ArticleController;
+use App\Http\Controllers\CommentController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
@@ -14,37 +16,12 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
-    $articles = \App\Models\Article::all();
-    return view('pages.mainPage', ['articles'=>$articles]);
-});
-
-Route::get('/dashboard', function () {
-    $user = auth()->user();
-    return view('dashboard', ['user'=>$user]);
-})->middleware(['auth', 'verified'])->name('dashboard');
-Route::get('/addArticle', function (){
-   return view('pages.addArticle');
-});
-Route::post('/addArticle', function (\Illuminate\Http\Request $request){
-    $title = $request->title;
-    $content = $request->contentField;
-    $userId = auth()->user()->getAuthIdentifier();
-    $article = new \App\Models\Article();
-    $article->title = $title;
-    $article->content = $content;
-    $article->user_id = $userId;
-    $article->save();
-    return redirect()->intended('/');
-});
-Route::get('/blog/{articleId}', function (\Illuminate\Http\Request $request){
-    $article = \App\Models\Article::where('id', $request->articleId)->first();
-    return view('pages.article', ['article'=>$article]);
-});
-Route::middleware('auth')->group(function () {
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-});
-
+Route::get('/', [ArticleController::class, 'showAllArticles']);
+Route::get('/profile', [ProfileController::class, 'showProfile'])->middleware(['auth'])->name('dashboard');
+Route::view('/addArticle', 'pages.addArticle')->middleware('auth');
+Route::post('/addArticle', [ArticleController::class, 'addArticle'])->middleware('auth');
+Route::get('/blog/{articleId}', [ArticleController::class, 'showArticle']);
+Route::get('/editArticle/{articleId}', [ArticleController::class, 'showEditArticle'])->middleware('auth');
+Route::post('/editArticle', [ArticleController::class, 'editArticle'])->middleware('auth');
+Route::post('/addComment', [CommentController::class, 'addComment'])->middleware('auth');
 require __DIR__.'/auth.php';
